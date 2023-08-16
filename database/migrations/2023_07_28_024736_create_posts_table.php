@@ -13,13 +13,8 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('slug')->unique();
             $table->string('title');
             $table->longText('content');
-            $table->boolean('published')->default(false);
-            $table->dateTime('publish_date')->default('2018-10-10 00:00:00');
-            $table->string('featured_image_path')->nullable();
-            $table->string('featured_image_caption');
             $table->timestamps();
             $table->foreignId('user_id')->constrained();
         });

@@ -6,60 +6,61 @@ use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
 class PostsController extends Controller
 {
-
-    /**
-     *  @name createPost
-     */
-
-     public function createPost(Request $request){
-        $incomingFields = $request->validate([
-
-        ]);
-
-        $incomingFields['title'] = strip_tags($incomingFields['title']);
-        $incomingFields['content'] = strip_tags($incomingFields['content']);
-        $incomingFields['user_id'] = auth()->id();
-
-        Post::create($incomingFields);
-        return redirect('/Dashboard');
-     }
-
-
     /**
      *  return posts.
      * 
      */
-    public function index() {
-        return view("/dashboard", [
-            "posts" => Post::all() 
+    public function index()
+    {
+        $posts = Post::all();
+        return view("welcome", ['posts' => $posts]);
+    }
+
+    public function create()
+    {
+        return view("editor");
+    }
+
+    public function store(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'title' => 'bail|required|string|max:255',
+            "content" => 'bail|required',
         ]);
-    } 
+        
+        // Create a new post
+        
 
-    public function posts()
-    {
-        // This defines a one-to-many relationship between User and Post
-        return $this->hasMany(Post::class);
-    }
+        Post::create([
+            "id" => $request->id,
+            "title" => $request->title,
+            "content" => $request->content,
+            "user_id" => auth()->id(), // Assuming you want to associate the post with the currently logged-in user
+        ]);
     
-    // In the controller or anywhere you want to use the function
-    public function getUserPosts(Request $request)
+        // Uncomment the line below when you're sure the post creation is working
+        // return redirect(route('dashboard'));
+    }
+
+    public function show(Post $post)
     {
-        // This finds the user by their id
-        $user_posts =Post::where(auth()->user()->userPosts()->latest())->get();
-        // This returns a collection of posts that belong to the user
-        return view('dashboard', ['user_posts', $user_posts]);
     }
 
-    public function show (string $slug, string $id): RedirectResponse | Post {
-        $post = Post :: findOrFail($id);
-        if ($post->slug != $slug){
-            return to_route('bloh.show', ['slug' => $post->$slug, 'id' => $post->id]);
-        }
-        return $post;
+    public function edit(Post $post)
+    {
     }
 
+    public function update(Request $request, Post $post)
+    {
+    }
+
+    public function destroy(Post $post)
+    {
+    }
 }
